@@ -3,9 +3,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Loaded="WindowOnLoaded" Closed="WindowOnClosed"
         SizeToContent="WidthAndHeight">
-    <Grid Height="480" Width="640">
+    <Grid Height="480">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="640" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
         <Image x:Name="RgbImage" />
         <!--<Canvas x:Name="SkeletonShow" />-->
-        <Image x:Name="SkeletonImage" />
+        <Image x:Name="SkeletonImage" Grid.Column="0" />
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Slider x:Name="ElevationAngleSlider" Orientation="Vertical" TickFrequency="1" IsSnapToTickEnabled="True"
+                    Thumb.DragCompleted="ElevationAngleSliderOnDragCompleted"
+                    Visibility="Hidden" />
+            <TextBlock Grid.Row="1" Text="{Binding Value, ElementName=ElevationAngleSlider, Mode=OneWay}"
+                       HorizontalAlignment="Right"
+                       Visibility="{Binding Visibility, ElementName=ElevationAngleSlider, Mode=OneWay}" />
+        </Grid>
     </Grid>
 </Window>

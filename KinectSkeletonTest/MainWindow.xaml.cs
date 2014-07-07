@@ -1,12 +1,16 @@
 ﻿// 既知の問題:
 // - Window.Closed イベントハンドラーで KinectSensorChooser.Stop メソッドを呼んだら返ってこない -> フリーズする。
 //   -> アプリが終了しない。
+// - ElevationAngleSlider は Drag & Drop 以外での値変更に対応していない。めんどいから。
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Coding4Fun.Kinect.Wpf;
 using Microsoft.Kinect;
@@ -64,7 +68,10 @@ namespace KinectSkeletonTest
             var newSensor = e.NewSensor;
             if (newSensor != null)
             {
-                newSensor.ElevationAngle = 20;
+                this.ElevationAngleSlider.Value = newSensor.ElevationAngle;
+                this.ElevationAngleSlider.Maximum = newSensor.MaxElevationAngle;
+                this.ElevationAngleSlider.Minimum = newSensor.MinElevationAngle;
+                this.ElevationAngleSlider.Visibility = Visibility.Visible;
 
                 newSensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
                 newSensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
@@ -90,6 +97,10 @@ namespace KinectSkeletonTest
 
                 newSensor.ColorFrameReady += KinectSensorOnColorFrameReady;
                 newSensor.SkeletonFrameReady += KinectSensorOnSkeletonFrameReady;
+            }
+            else
+            {
+                this.ElevationAngleSlider.Visibility = Visibility.Hidden;
             }
         }
 
@@ -233,6 +244,21 @@ namespace KinectSkeletonTest
         private static double EnsureRange(double value, double min, double max)
         {
             return Math.Min(Math.Max(value, min), max);
+        }
+
+        private void ElevationAngleSliderOnDragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            var kinect = _sensorChooser.Kinect;
+            if (kinect == null) return;
+
+            try
+            {
+                kinect.ElevationAngle = (int)((Slider)sender).Value;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
 
         private void WindowOnClosed(object sender, EventArgs e)
